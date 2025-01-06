@@ -1,5 +1,4 @@
 import type { AnyTRPCRouter, inferRouterContext } from '@trpc/server';
-import { Unsubscribable } from '@trpc/server/observable';
 import { ipcMain } from 'electron';
 import type { BrowserWindow, IpcMainEvent } from 'electron';
 
@@ -18,7 +17,7 @@ const getInternalId = (event: IpcMainEvent, request: ETRPCRequest) => {
 
 class IPCHandler<TRouter extends AnyTRPCRouter> {
   #windows: BrowserWindow[] = [];
-  #subscriptions: Map<string, Unsubscribable> = new Map();
+  #subscriptions: Map<string, AbortController> = new Map();
 
   constructor({
     createContext,
@@ -26,7 +25,7 @@ class IPCHandler<TRouter extends AnyTRPCRouter> {
     windows = [],
   }: {
     createContext?: (
-      opts: CreateContextOptions
+      opts: CreateContextOptions,
     ) => MaybePromise<inferRouterContext<TRouter>>;
     router: TRouter;
     windows?: BrowserWindow[];
@@ -44,7 +43,7 @@ class IPCHandler<TRouter extends AnyTRPCRouter> {
           message: request,
           subscriptions: this.#subscriptions,
         });
-      }
+      },
     );
   }
 
@@ -71,7 +70,7 @@ class IPCHandler<TRouter extends AnyTRPCRouter> {
   }) {
     for (const [key, sub] of this.#subscriptions.entries()) {
       if (key.startsWith(`${webContentsId}-${frameRoutingId ?? ''}`)) {
-        sub.unsubscribe();
+        sub.abort();
         this.#subscriptions.delete(key);
       }
     }
@@ -96,7 +95,7 @@ export const createIPCHandler = <TRouter extends AnyTRPCRouter>({
   windows = [],
 }: {
   createContext?: (
-    opts: CreateContextOptions
+    opts: CreateContextOptions,
   ) => Promise<inferRouterContext<TRouter>>;
   router: TRouter;
   windows?: Electron.BrowserWindow[];
