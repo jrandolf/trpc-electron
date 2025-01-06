@@ -56,9 +56,18 @@ class IPCHandler<TRouter extends AnyTRPCRouter> {
     this.#attachSubscriptionCleanupHandlers(win);
   }
 
-  detachWindow(win: BrowserWindow) {
+  detachWindow(win: BrowserWindow, webContentsId?: number) {
     this.#windows = this.#windows.filter(w => w !== win);
-    this.#cleanUpSubscriptions({ webContentsId: win.webContents.id });
+
+    if (win.isDestroyed() && webContentsId === undefined) {
+      throw new Error(
+        'webContentsId is required when calling detachWindow on a destroyed window',
+      );
+    }
+
+    this.#cleanUpSubscriptions({
+      webContentsId: webContentsId ?? win.webContents.id,
+    });
   }
 
   #cleanUpSubscriptions({
@@ -77,14 +86,17 @@ class IPCHandler<TRouter extends AnyTRPCRouter> {
   }
 
   #attachSubscriptionCleanupHandlers(win: BrowserWindow) {
-    win.webContents.on('did-start-navigation', ({ frame }) => {
-      this.#cleanUpSubscriptions({
-        webContentsId: win.webContents.id,
-        frameRoutingId: frame.routingId,
-      });
+    const webContentsId = win.webContents.id;
+    win.webContents.on('did-start-navigation', ({ isSameDocument, frame }) => {
+      if (!isSameDocument) {
+        this.#cleanUpSubscriptions({
+          webContentsId: webContentsId,
+          frameRoutingId: frame.routingId,
+        });
+      }
     });
     win.webContents.on('destroyed', () => {
-      this.detachWindow(win);
+      this.detachWindow(win, webContentsId);
     });
   }
 }
