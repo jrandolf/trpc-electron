@@ -1,16 +1,16 @@
-import { Operation, TRPCClientError, TRPCLink } from '@trpc/client';
+import { type Operation, TRPCClientError, type TRPCLink } from '@trpc/client';
+import {
+  getTransformer,
+  type TransformerOptions,
+} from '@trpc/client/unstable-internals';
 import type {
   AnyTRPCRouter,
   inferRouterContext,
-  TRPCProcedureType,
   inferTRPCClientTypes,
+  TRPCProcedureType,
 } from '@trpc/server';
+import { type Observer, observable } from '@trpc/server/observable';
 import type { TRPCResponseMessage } from '@trpc/server/rpc';
-import { observable, Observer } from '@trpc/server/observable';
-import {
-  type TransformerOptions,
-  getTransformer,
-} from '@trpc/client/unstable-internals';
 import type { RendererGlobalElectronTRPC } from '../types';
 import { transformResult } from './utils';
 
@@ -34,7 +34,7 @@ const getElectronTRPC = () => {
 
   if (!electronTRPC) {
     throw new Error(
-      'Could not find `electronTRPC` global. Check that `exposeElectronTRPC` has been called in your preload file.'
+      'Could not find `electronTRPC` global. Check that `exposeElectronTRPC` has been called in your preload file.',
     );
   }
 
@@ -97,7 +97,7 @@ export type IPCLinkOptions<TRouter extends AnyTRPCRouter> = TransformerOptions<
 >;
 
 export function ipcLink<TRouter extends AnyTRPCRouter>(
-  opts?: IPCLinkOptions<TRouter>
+  opts?: IPCLinkOptions<TRouter>,
 ): TRPCLink<TRouter> {
   return () => {
     const client = new IPCClient();

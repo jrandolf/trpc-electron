@@ -1,18 +1,18 @@
 import type { AnyTRPCRouter, inferRouterContext } from '@trpc/server';
-import { ipcMain } from 'electron';
 import type { BrowserWindow, IpcMainEvent } from 'electron';
+import { ipcMain } from 'electron';
 
 import { ELECTRON_TRPC_CHANNEL } from '../constants';
-import { ETRPCRequest } from '../types';
+import type { ETRPCRequest } from '../types';
 import { handleIPCMessage } from './handleIPCMessage';
-import { CreateContextOptions } from './types';
+import type { CreateContextOptions } from './types';
 
 type MaybePromise<TType> = Promise<TType> | TType;
 
 const getInternalId = (event: IpcMainEvent, request: ETRPCRequest) => {
   const messageId =
     request.method === 'request' ? request.operation.id : request.id;
-  return `${event.sender.id}-${event.senderFrame.routingId}:${messageId}`;
+  return `${event.sender.id}-${event.senderFrame?.routingId ?? ''}:${messageId}`;
 };
 
 class IPCHandler<TRouter extends AnyTRPCRouter> {
@@ -91,7 +91,7 @@ class IPCHandler<TRouter extends AnyTRPCRouter> {
       if (!isSameDocument) {
         this.#cleanUpSubscriptions({
           webContentsId: webContentsId,
-          frameRoutingId: frame.routingId,
+          frameRoutingId: frame?.routingId,
         });
       }
     });
