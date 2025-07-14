@@ -1,4 +1,4 @@
-import { ipcRenderer, contextBridge } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
 
 import { ELECTRON_TRPC_CHANNEL } from '../constants';
 import type { RendererGlobalElectronTRPC } from '../types';

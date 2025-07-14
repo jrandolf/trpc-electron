@@ -5,12 +5,14 @@ import { defineConfig } from 'vite';
 module.exports = defineConfig({
   base: './',
   build: {
+    // Importantly, `main` build runs first and empties the out dir
+    emptyOutDir: false,
     lib: {
       entry: path.resolve(__dirname, './index.ts'),
       name: 'trpc-electron',
       formats: ['es', 'cjs'],
       fileName: format =>
-        ({ es: 'main.mjs', cjs: 'main.cjs' })[format as 'es' | 'cjs'],
+        ({ es: 'preload.mjs', cjs: 'preload.cjs' })[format as 'es' | 'cjs'],
     },
     outDir: path.resolve(__dirname, '../../dist'),
     rollupOptions: {

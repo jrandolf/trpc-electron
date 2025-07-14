@@ -13,6 +13,11 @@ const config = {
       outFile: `./dist/main.d.ts`,
       noCheck: true,
     },
+    {
+      filePath: './src/preload/index.ts',
+      outFile: `./dist/preload.d.ts`,
+      noCheck: true,
+    },
   ],
 };
 
